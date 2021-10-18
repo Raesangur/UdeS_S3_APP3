@@ -8,9 +8,9 @@ public class DataLinkLayer extends Layer {
     private int transmittedPackets = 0;
 
     // Singleton
-    private DataLinkLayer instance;
+    private static DataLinkLayer instance;
     private DataLinkLayer() {}
-    public DataLinkLayer getInstance() {
+    static public DataLinkLayer getInstance() {
         return instance == null ? new DataLinkLayer() : instance;
     }
 
@@ -23,17 +23,21 @@ public class DataLinkLayer extends Layer {
 
     @Override
     protected void ReceiveFromDown(byte[] PDU) {
+        // Extract data from PDU
+        byte[] paquet = new byte[PDU.length - 4];
+        arraycopy(PDU, 4, paquet, 0, paquet.length);
+
         // Calculate & Check CRC
         CRC32 crc = new CRC32();
-        crc.update(PDU);
-        if (crc.getValue() != 0) {  // Error in CRC
+        crc.update(paquet);
+        int crcValue = (int) crc.getValue();
+        int oldCRC = (((int) PDU[0] << 24) & 0xFF000000) | (((int) PDU[1] << 16) & 0x00FF0000) | (((int) PDU[2] << 8) & 0x0000FF00) | ((int) PDU[3] & 0x000000FF);
+        if (crcValue != oldCRC) {  // Error in CRC
+            System.out.println("Error CRC32");
             crcErrors++;
             return;                 // Drop packet
         }
 
-        // Extract data from PDU
-        byte[] paquet = new byte[PDU.length - 4];
-        arraycopy(PDU, 4, paquet, 0, paquet.length);
 
         // Send PDU to network layer
         receivedPackets++;

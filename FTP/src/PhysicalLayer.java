@@ -7,9 +7,9 @@ public class PhysicalLayer extends Layer {
     protected ReceptionThread thread;
 
     // Singleton
-    private PhysicalLayer instance;
+    private static PhysicalLayer instance;
     private PhysicalLayer(){}
-    public Layer getInstance() {
+    static public PhysicalLayer getInstance() {
         return instance == null ? new PhysicalLayer() : instance;
     }
 
@@ -26,9 +26,13 @@ public class PhysicalLayer extends Layer {
 
     public void start() {
         thread.running = true;
+        thread.start();
     }
     public void stop() {
         thread.running = false;
+    }
+    public boolean threadRunnint() {
+        return thread.running;
     }
 
     @Override
@@ -45,6 +49,7 @@ public class PhysicalLayer extends Layer {
         DatagramPacket packet = new DatagramPacket(PDU, PDU.length, address, port);
         try {
             socket.send(packet);
+            System.out.println("Packet sent");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,7 +57,12 @@ public class PhysicalLayer extends Layer {
 
     @Override
     public void ReceiveFromDown(byte[] PDU) {
+        System.out.println("Packet received");
         PassUp(PDU);
+    }
+
+    public void createReceptionThread(int port) throws IOException {
+        this.thread = new ReceptionThread(port, this);
     }
 
 
@@ -75,6 +85,8 @@ public class PhysicalLayer extends Layer {
                     // receive request
                     DatagramPacket packet = new DatagramPacket(buf, buf.length);
                     socket.receive(packet);
+
+
 
                     // Send packet data to parent
                     parent.ReceiveFromDown(packet.getData());
