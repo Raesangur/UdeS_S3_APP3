@@ -64,8 +64,6 @@ public class TransportLayer extends Layer {
 
     @Override
     protected void ReceiveFromDown(byte[] PDU) {
-        System.out.println("transport layer received");
-
         byte[] seq_bytes = Arrays.copyOfRange(PDU, SEQ_HEADER_POS, SIZE_HEADER_POS);
         byte[] size_bytes = Arrays.copyOfRange(PDU, SIZE_HEADER_POS, OFFSET + 1);
 
@@ -94,12 +92,14 @@ public class TransportLayer extends Layer {
             case CODE_ACK:
                 break;
             case CODE_RESEND:
+                System.out.println("resend packet:" + errors);
                 PassDown(TPDU[seq]);
                 break;
         }
 
         if(EndSequence != -1) {
-            if(receiveBuffer.size() - 1 != EndSequence)
+            System.out.println("size " + receiveBuffer.size() + " end sequence " + EndSequence);
+            if(receiveBuffer.size() <= EndSequence)
                 return;
             int arrayL = (receiveBuffer.size() - 1) * SIZE + receiveBuffer.get(EndSequence).length;
             byte[] passUpBuffer = new byte[arrayL];
@@ -108,13 +108,12 @@ public class TransportLayer extends Layer {
                 arraycopy(key_value.getValue(), 0, passUpBuffer, count, key_value.getValue().length);
                 count += key_value.getValue().length;
             }
+            System.out.println("ERRRORSSSS:" + errors);
             PassUp(passUpBuffer);
         }
     }
 
     private void savePDU(int seq, byte[] data_bytes) {
-        if (receiveBuffer.get(seq) != null)
-            return;
         if (seq != 0 && receiveBuffer.get(seq - 1) == null) {
             errors++;
             if(errors >= 3) {
@@ -123,6 +122,8 @@ public class TransportLayer extends Layer {
             byte[] rPDU = createResendPDU(seq - 1);
             PassDown(rPDU);
         }
+        if (receiveBuffer.get(seq) != null)
+            return;
         receiveBuffer.put(seq, data_bytes);
         byte[] ackPDU = createAckPDU(seq);
         PassDown(ackPDU);

@@ -18,12 +18,14 @@ public class ClientApp {
 
         // set server
         physicalLayer.createReceptionThread(4445);
+        physicalLayer.errorDelay = 10;
+        physicalLayer.delay = 1;
         physicalLayer.start();
         physicalLayer.setDestPort(4446);
         physicalLayer.setDestAddress("localhost");
         applicaitonLayer.SendFile("guide3.pdf");
 
-
+        System.out.println(physicalLayer.hashCode());
         while(physicalLayer.threadRunnint()) {
 
         }

@@ -5,6 +5,9 @@ public class PhysicalLayer extends Layer {
     InetAddress address = null;
     int port = 0;
     protected ReceptionThread thread;
+    public int delay = 0;
+    public int errorDelay = -1;
+    public int packetSent = 0;
 
     // Singleton
     private static PhysicalLayer instance;
@@ -52,18 +55,23 @@ public class PhysicalLayer extends Layer {
             e.printStackTrace();
         }
 
+        // shift bit for error
+        packetSent++;
+        if(packetSent == errorDelay)
+            PDU[10] <<= 1;
+
         // send request
         DatagramPacket packet = new DatagramPacket(PDU, PDU.length, address, port);
         try {
             socket.send(packet);
-        } catch (IOException e) {
+            Thread.sleep(delay);
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
     @Override
     public void ReceiveFromDown(byte[] PDU) {
-        System.out.println("Packet received");
         PassUp(PDU);
     }
 
@@ -78,7 +86,7 @@ public class PhysicalLayer extends Layer {
         public boolean running = true;
 
         public ReceptionThread(int port, PhysicalLayer parent) throws IOException {
-            super("FTP ReceptionThread");
+            super("FTP ReceptionThread " + Math.random());
             socket = new DatagramSocket(port);
             this.parent = parent;
         }
@@ -93,11 +101,6 @@ public class PhysicalLayer extends Layer {
                     socket.receive(packet);
 
                     // set to client
-                    parent.setDestAddress(packet.getAddress());
-                    parent.setDestPort(packet.getPort());
-
-
-
                     // Send packet data to parent
                     parent.ReceiveFromDown(packet.getData());
                 } catch (IOException e) {
