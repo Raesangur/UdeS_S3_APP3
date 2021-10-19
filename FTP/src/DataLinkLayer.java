@@ -14,6 +14,9 @@ public class DataLinkLayer extends Layer {
         return instance == null ? new DataLinkLayer() : instance;
     }
 
+    /**
+     * Reset the statistics from the singleton
+     */
     public void Reset() {
         crcErrors = 0;
         receivedPackets = 0;
@@ -21,6 +24,12 @@ public class DataLinkLayer extends Layer {
     }
 
 
+    /**
+     * Receive data from the Physical Layer, check the CRC values, dump the
+     * packet if the CRC fails, or transmits it to the Network layer if
+     * successful.
+     * @param PDU   Packet from the Physical Layer
+     */
     @Override
     protected void ReceiveFromDown(byte[] PDU) throws TransmissionErrorException {
         // Extract data from PDU
@@ -44,6 +53,11 @@ public class DataLinkLayer extends Layer {
         PassUp(paquet);
     }
 
+    /**
+     * Receive a packet to transmit from the Network layer, add a 32-bit CRC
+     * to the front of it and transmits it to the Physical layer.
+     * @param PDU
+     */
     @Override
     protected void ReceiveFromUp(byte[] PDU) {
         // Allocate new PDU

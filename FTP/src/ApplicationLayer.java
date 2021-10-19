@@ -16,11 +16,22 @@ public class ApplicationLayer extends Layer{
         return instance == null ? instance = new ApplicationLayer() : instance;
     }
 
+    /**
+     * Receiving a PDU from the Layer above
+     * There are no layers above the Application Layer; the Main program instead
+     * calls the @SendFile method.
+     */
     @Override
     protected void ReceiveFromUp(byte[] PDU) {
         // NOTHING NOw
     }
 
+    /**
+     * Receive packet from the Transport Layer. Then creates a file in the
+     * `dest` directory, and dumps the content of the packet in it.
+     * @param PDU   Contains the name of the file in the first 188 bytes,
+     *              and the data from the file on the other bytes.
+     */
     @Override
     protected void ReceiveFromDown(byte[] PDU) {
         System.out.println("Receiving");
@@ -47,6 +58,10 @@ public class ApplicationLayer extends Layer{
         }
     }
 
+    /**
+     * Send a file to the transport layer.
+     * @param path  File to transmit.
+     */
     public void SendFile(String path) throws IOException {
         File file = new File(path);
         byte[] APDU;

@@ -30,6 +30,13 @@ public class TransportLayer extends Layer {
         return instance == null ? instance = new TransportLayer() : instance;
     }
 
+    /**
+     * Receive data from the Application Layer.
+     * A header containing an opcode, a sequence number and a data size is
+     * then appended to the PDU, which is sent to the Network Layer.
+     * @param PDU   Array containing the file name on the first 188 bytes.
+     *              The other bytes contain the raw data from the file.
+     */
     @Override
     protected void ReceiveFromUp(byte[] PDU) {
         int count = (int) Math.ceil((double) PDU.length / SIZE);
@@ -63,6 +70,14 @@ public class TransportLayer extends Layer {
         System.out.println("Done transmission of packets.");
     }
 
+    /**
+     * Receive a paquet from the Network Layer.
+     * The header is extracted and processed, and the data is added to a
+     * reception buffer until all paquets are received, the data is then
+     * concatenated and sent to the Application Layer.
+     * @param PDU   Paquet from the Network Layer containing a header +
+     *              some (up to 188 bytes) data.
+     */
     @Override
     protected void ReceiveFromDown(byte[] PDU) throws TransmissionErrorException {
         byte[] seq_bytes = Arrays.copyOfRange(PDU, SEQ_HEADER_POS, SIZE_HEADER_POS);
@@ -115,6 +130,13 @@ public class TransportLayer extends Layer {
         }
     }
 
+    /**
+     * Save a packet to the reception buffer.
+     * If a packet is found to be missing, send a retransmit request.
+     * If the packet is properly received, send an acknowledge message.
+     * @param seq           # of the paquet
+     * @param data_bytes    paquet data (without header)
+     */
     private void savePDU(int seq, byte[] data_bytes) throws TransmissionErrorException {
         if (seq != 0 && receiveBuffer.get(seq - 1) == null) {
             errors++;
@@ -132,6 +154,12 @@ public class TransportLayer extends Layer {
         PassDown(ackPDU);
     }
 
+    /**
+     * Create a resend packet with a resend opcode, a specific sequence
+     * number and no data.
+     * @param seq   Specific sequence number of the paquet to be requested.
+     * @return      PDU containing the resend request
+     */
     private byte[] createResendPDU(int seq) {
         int taille = 0;
         byte[] resendPDU = new byte[200];
@@ -145,6 +173,12 @@ public class TransportLayer extends Layer {
         return resendPDU;
     }
 
+    /**
+     * Create an ack packet with an ack opcode, a specific sequence
+     * number and no data.
+     * @param seq   Specific sequence number of the paquet to acknowledge.
+     * @return      PDU containing the acknowledge
+     */
     private byte[] createAckPDU(int seq) {
         byte[] ackPDU = new byte[200];
 
@@ -157,6 +191,12 @@ public class TransportLayer extends Layer {
         return ackPDU;
     }
 
+    /**
+     * Convert an integer data to 
+     * @param data
+     * @param size
+     * @return
+     */
     private byte[] convertIntToASCII(int data, int size) {
         String converted = Integer.toString(data);
         byte[] converted2 = converted.getBytes(StandardCharsets.US_ASCII);
