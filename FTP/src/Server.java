@@ -3,6 +3,8 @@ import java.util.LinkedList;
 
 public class Server {
     public static void main(String[] args) throws IOException {
+        String listening_port = args[0];
+
         TransportLayer transportLayer = TransportLayer.getInstance();
         NetworkLayer networkLayer = NetworkLayer.getInstance();
         DataLinkLayer dataLinkLayer = DataLinkLayer.getInstance();
@@ -19,7 +21,7 @@ public class Server {
 
 
         // set server
-        physicalLayer.createReceptionThread(4446);
+        physicalLayer.createReceptionThread(Integer.parseInt(listening_port));
         physicalLayer.start();
         physicalLayer.setDestPort(4445);
         physicalLayer.setDestAddress("localhost");

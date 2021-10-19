@@ -3,8 +3,9 @@ import java.io.*;
 public class ClientApp {
     public static void main(String[] args) throws IOException {
         String filename = args[0];
-        String ip = args[1];
-        boolean addErrors = Boolean.parseBoolean(args[2]);
+        String destination_ip = args[1];
+        String listening_port = args[2];
+        boolean addErrors = Boolean.parseBoolean(args[3]);
 
         TransportLayer transportLayer = TransportLayer.getInstance();
         NetworkLayer networkLayer = NetworkLayer.getInstance();
@@ -21,12 +22,12 @@ public class ClientApp {
         applicationLayer.setDownLayer(transportLayer);
 
         // set server
-        physicalLayer.createReceptionThread(4445);
+        physicalLayer.createReceptionThread(Integer.parseInt(listening_port));
         physicalLayer.errorDelay = addErrors ? 10 : -1;
         physicalLayer.delay = 1;
         physicalLayer.start();
         physicalLayer.setDestPort(4446);
-        physicalLayer.setDestAddress(ip);
+        physicalLayer.setDestAddress(destination_ip);
         applicationLayer.SendFile(filename);
 
         System.out.println(physicalLayer.hashCode());

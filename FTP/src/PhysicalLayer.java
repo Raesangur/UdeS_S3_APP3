@@ -71,7 +71,7 @@ public class PhysicalLayer extends Layer {
     }
 
     @Override
-    public void ReceiveFromDown(byte[] PDU) {
+    public void ReceiveFromDown(byte[] PDU) throws TransmissionErrorException {
         PassUp(PDU);
     }
 
@@ -103,9 +103,10 @@ public class PhysicalLayer extends Layer {
                     // set to client
                     // Send packet data to parent
                     parent.ReceiveFromDown(packet.getData());
-                } catch (IOException e) {
+                } catch (IOException | TransmissionErrorException e) {
                     running = false;
-                    e.printStackTrace();
+                    socket.close();
+                    System.out.println(e.getLocalizedMessage());
                 }
             }
             socket.close();

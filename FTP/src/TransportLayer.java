@@ -60,10 +60,11 @@ public class TransportLayer extends Layer {
             // Send lower Layer
             PassDown(TPDU[i]);
         }
+        System.out.println("Done transmission of packets.");
     }
 
     @Override
-    protected void ReceiveFromDown(byte[] PDU) {
+    protected void ReceiveFromDown(byte[] PDU) throws TransmissionErrorException {
         byte[] seq_bytes = Arrays.copyOfRange(PDU, SEQ_HEADER_POS, SIZE_HEADER_POS);
         byte[] size_bytes = Arrays.copyOfRange(PDU, SIZE_HEADER_POS, OFFSET + 1);
 
@@ -92,7 +93,8 @@ public class TransportLayer extends Layer {
             case CODE_ACK:
                 break;
             case CODE_RESEND:
-                System.out.println("resend packet:" + errors);
+                errors++;
+                System.out.println("resend packet: " + errors);
                 PassDown(TPDU[seq]);
                 break;
         }
@@ -113,11 +115,12 @@ public class TransportLayer extends Layer {
         }
     }
 
-    private void savePDU(int seq, byte[] data_bytes) {
+    private void savePDU(int seq, byte[] data_bytes) throws TransmissionErrorException {
         if (seq != 0 && receiveBuffer.get(seq - 1) == null) {
             errors++;
             if(errors >= 3) {
                 // TODO: throw error
+                throw new TransmissionErrorException("More then 3 error connection will be lost.");
             }
             byte[] rPDU = createResendPDU(seq - 1);
             PassDown(rPDU);

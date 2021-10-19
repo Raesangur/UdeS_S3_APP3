@@ -3,9 +3,9 @@ public abstract class Layer {
     private Layer layerDown;
 
     protected abstract void ReceiveFromUp(byte[] PDU);
-    protected abstract void ReceiveFromDown(byte[] PDU);
+    protected abstract void ReceiveFromDown(byte[] PDU) throws TransmissionErrorException;
 
-    protected void PassUp(byte[] PDU) {
+    protected void PassUp(byte[] PDU) throws TransmissionErrorException {
         layerUp.ReceiveFromDown(PDU);
     }
     protected void PassDown(byte[] PDU) {

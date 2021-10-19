@@ -10,7 +10,7 @@ public class NetworkLayer extends Layer {
     }
 
     @Override
-    protected void ReceiveFromDown(byte[] PDU) {
+    protected void ReceiveFromDown(byte[] PDU) throws TransmissionErrorException {
         PassUp(PDU);
     }
 }

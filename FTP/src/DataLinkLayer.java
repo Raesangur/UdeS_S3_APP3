@@ -22,7 +22,7 @@ public class DataLinkLayer extends Layer {
 
 
     @Override
-    protected void ReceiveFromDown(byte[] PDU) {
+    protected void ReceiveFromDown(byte[] PDU) throws TransmissionErrorException {
         // Extract data from PDU
         byte[] paquet = new byte[PDU.length - 4];
         arraycopy(PDU, 4, paquet, 0, paquet.length);

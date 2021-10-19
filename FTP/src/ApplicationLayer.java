@@ -37,8 +37,9 @@ public class ApplicationLayer extends Layer{
                 System.out.println("File already exists.");
             }
             try (FileOutputStream fos = new FileOutputStream(file.getPath())) {
-                System.out.println("writing stream");
+                System.out.println("Writing stream.");
                 fos.write(data_bytes);
+                System.out.println("Done writing.");
             }
         } catch (Exception e) {
             System.out.println("An error occurred.");
