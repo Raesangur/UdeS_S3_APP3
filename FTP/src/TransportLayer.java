@@ -38,10 +38,10 @@ public class TransportLayer extends Layer {
         for(int i = 0; i < count; i++) {
             int taille = SIZE;
             if (i == count - 1) {
-                taille = PDU.length % SIZE;
+                taille = PDU.length % 200;
             }
 
-            arraycopy(PDU, i * SIZE, TPDU[i], OFFSET + 1, taille - OFFSET);
+            arraycopy(PDU, i * 200, TPDU[i], OFFSET + 1, taille);
 
 
             char code = CODE_NORMAL;
@@ -72,7 +72,7 @@ public class TransportLayer extends Layer {
         int seq = convertAsciiToInt(seq_bytes);
         int size = convertAsciiToInt(size_bytes);
 
-        byte[] data_bytes = Arrays.copyOfRange(PDU, OFFSET + 1, OFFSET + size - 1);
+        byte[] data_bytes = Arrays.copyOfRange(PDU, OFFSET + 1, OFFSET + 1 + size);
 
         switch (code){
             case CODE_START:

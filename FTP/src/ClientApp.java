@@ -21,6 +21,6 @@ public class ClientApp {
         physicalLayer.start();
         physicalLayer.setDestPort(4445);
         physicalLayer.setDestAddress("localhost");
-        applicaitonLayer.SendFile("K:/UdeS_S3_APP3/FTP/bonmatin.txt");
+        applicaitonLayer.SendFile("bonmatin.txt");
     }
 }

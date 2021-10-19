@@ -29,12 +29,15 @@ public class ApplicationLayer extends Layer{
         try {
             String filePath = new File("").getAbsolutePath();
             File file = new File(filePath + "/dest/" + title);
+            if(file.exists())
+                file.delete();
             if (file.createNewFile()) {
                 System.out.println("File created: " + file.getName());
             } else {
                 System.out.println("File already exists.");
             }
-            try (FileOutputStream fos = new FileOutputStream(title)) {
+            try (FileOutputStream fos = new FileOutputStream(file.getPath())) {
+                System.out.println("writing stream");
                 fos.write(data_bytes);
             }
         } catch (Exception e) {
