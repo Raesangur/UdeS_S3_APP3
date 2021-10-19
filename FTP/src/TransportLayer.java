@@ -1,8 +1,7 @@
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
+
 import static java.util.Arrays.fill;
-import java.util.LinkedList;
 
 import static java.lang.System.arraycopy;
 
@@ -23,7 +22,9 @@ public class TransportLayer extends Layer {
     private int errors;
 
     private byte[][] TPDU;
-    private LinkedList<byte[]> receiveBuffer;
+    private Map<Integer, byte[]> receiveBuffer;
+
+    private int EndSequence = -1;
 
     public static TransportLayer getInstance() {
         return instance == null ? instance = new TransportLayer() : instance;
@@ -38,16 +39,16 @@ public class TransportLayer extends Layer {
         for(int i = 0; i < count; i++) {
             int taille = SIZE;
             if (i == count - 1) {
-                taille = PDU.length % 200;
+                taille = PDU.length % SIZE;
             }
 
-            arraycopy(PDU, i * 200, TPDU[i], OFFSET + 1, taille);
+            arraycopy(PDU, i * SIZE, TPDU[i], OFFSET + 1, taille);
 
 
             char code = CODE_NORMAL;
             if (i == 0) {
                 code = CODE_START;
-            } else if (i == count - i) {
+            } else if (i == count - 1) {
                 code = CODE_END;
             }
 
@@ -77,40 +78,18 @@ public class TransportLayer extends Layer {
         switch (code){
             case CODE_START:
                 // start of the communication & reset receive Buffer
-                receiveBuffer = new LinkedList<>();
-                receiveBuffer.add(0,  data_bytes); // file name
+                EndSequence = -1;
+                receiveBuffer = new HashMap<>();
+                savePDU(0, data_bytes);
                 break;
 
             case CODE_END:
-                receiveBuffer.add(seq, data_bytes);
-                int arrayL = (receiveBuffer.size() - 1) * SIZE + data_bytes.length;
-                byte[] passUpBuffer = new byte[arrayL];
-                int count = 0;
-                for (byte[] arr : receiveBuffer) {
-                    arraycopy(arr, 0, passUpBuffer, count, arr.length);
-                    count += arr.length;
-                }
-                PassUp(passUpBuffer);
+                EndSequence = seq;
+                savePDU(seq, data_bytes);
                 break;
 
             case CODE_NORMAL:
-                try {
-                    if (receiveBuffer.get(seq - 1) == null) {
-                        byte[] rPDU = createResendPDU(seq - 1);
-                        PassDown(rPDU);
-                    }
-                }catch (IndexOutOfBoundsException e) {
-                    errors++;
-                    if(errors >= 3) {
-                        // TODO: throw error
-                    }
-
-                    byte[] rPDU = createResendPDU(seq - 1);
-                    PassDown(rPDU);
-                }
-                receiveBuffer.add(seq, data_bytes);
-                byte[] ackPDU = createAckPDU(seq);
-                PassDown(ackPDU);
+                savePDU(seq, data_bytes);
                 break;
             case CODE_ACK:
                 break;
@@ -118,6 +97,35 @@ public class TransportLayer extends Layer {
                 PassDown(TPDU[seq]);
                 break;
         }
+
+        if(EndSequence != -1) {
+            if(receiveBuffer.size() - 1 != EndSequence)
+                return;
+            int arrayL = (receiveBuffer.size() - 1) * SIZE + receiveBuffer.get(EndSequence).length;
+            byte[] passUpBuffer = new byte[arrayL];
+            int count = 0;
+            for (Map.Entry<Integer, byte[]> key_value : receiveBuffer.entrySet()) {
+                arraycopy(key_value.getValue(), 0, passUpBuffer, count, key_value.getValue().length);
+                count += key_value.getValue().length;
+            }
+            PassUp(passUpBuffer);
+        }
+    }
+
+    private void savePDU(int seq, byte[] data_bytes) {
+        if (receiveBuffer.get(seq) != null)
+            return;
+        if (seq != 0 && receiveBuffer.get(seq - 1) == null) {
+            errors++;
+            if(errors >= 3) {
+                // TODO: throw error
+            }
+            byte[] rPDU = createResendPDU(seq - 1);
+            PassDown(rPDU);
+        }
+        receiveBuffer.put(seq, data_bytes);
+        byte[] ackPDU = createAckPDU(seq);
+        PassDown(ackPDU);
     }
 
     private byte[] createResendPDU(int seq) {

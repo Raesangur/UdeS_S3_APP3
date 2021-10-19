@@ -20,6 +20,13 @@ public class PhysicalLayer extends Layer {
             e.printStackTrace();
         }
     }
+    public void setDestAddress(InetAddress address) {
+        try {
+            this.address = address;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     public void setDestPort(int port) {
         this.port = port;
     }
@@ -49,7 +56,6 @@ public class PhysicalLayer extends Layer {
         DatagramPacket packet = new DatagramPacket(PDU, PDU.length, address, port);
         try {
             socket.send(packet);
-            System.out.println("Packet sent");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -68,10 +74,10 @@ public class PhysicalLayer extends Layer {
 
     private class ReceptionThread extends Thread{
         protected DatagramSocket socket = null;
-        private Layer parent;
+        private PhysicalLayer parent;
         public boolean running = true;
 
-        public ReceptionThread(int port, Layer parent) throws IOException {
+        public ReceptionThread(int port, PhysicalLayer parent) throws IOException {
             super("FTP ReceptionThread");
             socket = new DatagramSocket(port);
             this.parent = parent;
@@ -85,6 +91,10 @@ public class PhysicalLayer extends Layer {
                     // receive request
                     DatagramPacket packet = new DatagramPacket(buf, buf.length);
                     socket.receive(packet);
+
+                    // set to client
+                    parent.setDestAddress(packet.getAddress());
+                    parent.setDestPort(packet.getPort());
 
 
 

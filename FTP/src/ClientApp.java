@@ -17,10 +17,15 @@ public class ClientApp {
         applicaitonLayer.setDownLayer(transportLayer);
 
         // set server
-        physicalLayer.createReceptionThread(4446);
+        physicalLayer.createReceptionThread(4445);
         physicalLayer.start();
-        physicalLayer.setDestPort(4445);
+        physicalLayer.setDestPort(4446);
         physicalLayer.setDestAddress("localhost");
-        applicaitonLayer.SendFile("bonmatin.txt");
+        applicaitonLayer.SendFile("guide3.pdf");
+
+
+        while(physicalLayer.threadRunnint()) {
+
+        }
     }
 }

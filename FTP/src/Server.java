@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.util.LinkedList;
 
 public class Server {
     public static void main(String[] args) throws IOException {
@@ -14,11 +15,14 @@ public class Server {
         networkLayer.setDownLayer(dataLinkLayer);
         transportLayer.setDownLayer(networkLayer);
         transportLayer.setUpLayer(applicaitonLayer);
+        applicaitonLayer.setDownLayer(transportLayer);
 
 
         // set server
-        physicalLayer.createReceptionThread(4445);
+        physicalLayer.createReceptionThread(4446);
         physicalLayer.start();
+        physicalLayer.setDestPort(4445);
+        physicalLayer.setDestAddress("localhost");
 
         System.out.println("Running");
         while(physicalLayer.threadRunnint()) {

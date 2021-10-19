@@ -52,9 +52,9 @@ public class ApplicationLayer extends Layer{
         byte[] filename = file.getName().getBytes();
         Path filePath = file.toPath();
         byte[] fileBytes = Files.readAllBytes(filePath);
-        APDU = new byte[200 + fileBytes.length];
+        APDU = new byte[188 + fileBytes.length];
         arraycopy(filename, 0, APDU, 0, filename.length);
-        arraycopy(fileBytes, 0, APDU, 200, fileBytes.length);
+        arraycopy(fileBytes, 0, APDU, 188, fileBytes.length);
         PassDown(APDU);
     }
 }
