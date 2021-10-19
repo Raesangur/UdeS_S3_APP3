@@ -7,15 +7,15 @@ public class Server {
         NetworkLayer networkLayer = NetworkLayer.getInstance();
         DataLinkLayer dataLinkLayer = DataLinkLayer.getInstance();
         PhysicalLayer physicalLayer = PhysicalLayer.getInstance();
-        ApplicationLayer applicaitonLayer = ApplicationLayer.getInstance();
+        ApplicationLayer applicationLayer = ApplicationLayer.getInstance();
         physicalLayer.setUpLayer(dataLinkLayer);
         dataLinkLayer.setUpLayer(networkLayer);
         dataLinkLayer.setDownLayer(physicalLayer);
         networkLayer.setUpLayer(transportLayer);
         networkLayer.setDownLayer(dataLinkLayer);
         transportLayer.setDownLayer(networkLayer);
-        transportLayer.setUpLayer(applicaitonLayer);
-        applicaitonLayer.setDownLayer(transportLayer);
+        transportLayer.setUpLayer(applicationLayer);
+        applicationLayer.setDownLayer(transportLayer);
 
 
         // set server
