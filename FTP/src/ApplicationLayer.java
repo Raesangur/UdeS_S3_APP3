@@ -62,7 +62,7 @@ public class ApplicationLayer extends Layer{
      * Send a file to the transport layer.
      * @param path  File to transmit.
      */
-    public void SendFile(String path) throws IOException {
+    public void SendFile(String path) throws IOException, InterruptedException {
         File file = new File(path);
         byte[] APDU;
         byte[] filename = file.getName().getBytes();
@@ -72,5 +72,7 @@ public class ApplicationLayer extends Layer{
         arraycopy(filename, 0, APDU, 0, filename.length);
         arraycopy(fileBytes, 0, APDU, 188, fileBytes.length);
         PassDown(APDU);
+        Thread.sleep(1000);
+        System.exit(0);
     }
 }

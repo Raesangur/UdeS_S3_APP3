@@ -60,6 +60,7 @@ public class PhysicalLayer extends Layer {
      */
     public void stop() {
         thread.running = false;
+        thread.stop();
     }
 
     /**
